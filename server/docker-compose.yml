@@ -1,0 +1,27 @@
+# docker-compose.yml
+
+version: '3.8'
+
+services:
+  cv2-service:
+    build: 
+      dockerfile: CV2Service.Dockerfile
+    image: react-analytics-heatmap/cv2-service
+    container_name: cv2-service
+    command: bash -c 'uvicorn app.main:app --host 0.0.0.0'
+    volumes:
+      - ./data:/app/app/data
+    ports:
+      - 8000:8000
+    environment:
+      - CV2_FASTAPI_PORT=${CV2_FASTAPI_PORT}
+  socket-service:
+    build: 
+      dockerfile: SocketService.Dockerfile
+    image: react-analytics-heatmap/socket-service
+    container_name: socket-service
+    command: node index.js
+    volumes:
+      - ./data:/usr/src/app/data
+    ports:
+      - 4001:4001
