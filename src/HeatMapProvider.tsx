@@ -47,7 +47,9 @@ export const HeatMapProvider = (props: PropsWithChildren<HeatmapProviderProps>) 
 
   useEffect(() => {
     try {
-      const s = io(server);
+      const s = io(server, {
+        auth: { uid: uid },
+      });
       setSocket(s);
     } catch (error) {
       console.log(error);
@@ -57,7 +59,7 @@ export const HeatMapProvider = (props: PropsWithChildren<HeatmapProviderProps>) 
   useEffect(() => {
     if (socket && snapshotId) {
       socket.emit('sendMousePosition', {
-        uid: uid || 'default',
+        uid: uid,
         snapshotId: snapshotId,
         position: position,
       });
@@ -67,7 +69,7 @@ export const HeatMapProvider = (props: PropsWithChildren<HeatmapProviderProps>) 
   useEffect(() => {
     if (image && socket && snapshotId) {
       socket.emit('sendImage', {
-        uid: uid || 'default',
+        uid: uid,
         snapshotId: snapshotId,
         image: image,
       });
