@@ -1,5 +1,5 @@
 {
-  "name": "@supdann/react-analytics-heatmap",
+  "name": "react-analytics-heatmap",
   "version": "1.0.0",
   "description": "React Heatmap Analytics",
   "main": "./lib/index.js",
