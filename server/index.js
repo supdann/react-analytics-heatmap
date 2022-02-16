@@ -14,24 +14,12 @@ const io = socket(server, {
 
 const data_dict = {}
 
-setInterval(() => {
-  for (const uid of Object.keys(data_dict)) {
-    const difference = new Date().getTime() - data_dict[uid].last_updated.getTime()
-    var secondsDifference = Math.floor(difference / 1000);
-    if (secondsDifference > 10) {
-      const data_to_save = { ...data_dict[uid], last_updated: data_dict[uid].last_updated.getTime() }
-      fs.writeFile(`./data/${uid}_${data_dict[uid].snapshotId}.json`, JSON.stringify(data_to_save), (err) => {
-        if (err) throw err;
-      });
-    }
-  }
-}, 1000)
-
 const save_data = (uid) => {
   return new Promise((resolve, reject) => {
     if (data_dict[uid] !== undefined && data_dict[uid].data.length > 0) {
       console.log("Saving data")
-      fs.writeFile(`./data/${uid}_${snapshotId}.json`, data_dict[uid], (err) => {
+      const data_to_save = { ...data_dict[uid], last_updated: data_dict[uid].last_updated.getTime() }
+      fs.writeFile(`./data/${uid}_${data_dict[uid].snapshotId}.json`, JSON.stringify(data_to_save), (err) => {
         if (err) reject(err);
         resolve()
       });
@@ -41,7 +29,20 @@ const save_data = (uid) => {
   })
 }
 
-const reset_data = (uid) => {
+setInterval(async () => {
+  for (const uid of Object.keys(data_dict)) {
+    const difference = new Date().getTime() - data_dict[uid].last_updated.getTime()
+    var secondsDifference = Math.floor(difference / 1000);
+    if (secondsDifference > 10 && !data_dict[uid].saved) {
+      await save_data(uid)
+      data_dict[uid].saved = true
+    }
+  }
+}, 1000)
+
+
+
+const reset_data = (uid, snapshotId) => {
   data_dict[uid] = { uid: uid, snapshotId: snapshotId, data: [], last_updated: new Date() }
 }
 
@@ -62,7 +63,7 @@ io.on("connection", (socket) => {
       console.log(err);
     });
     await save_data(uid);
-    reset_data(uid)
+    reset_data(uid, snapshotId)
 
   });
 
@@ -72,13 +73,14 @@ io.on("connection", (socket) => {
       const date = new Date()
       data_dict[uid].data.push({ x: position.x, y: position.y, timestamp: date.getTime() })
       data_dict[uid].last_updated = date
+      data_dict[uid].saved = false
     }
   });
 
-  socket.on("disconnect", (socket) => {
+  socket.on("disconnect", () => {
     console.log("Client disconnected: " + socket.uid);
     save_data(socket.uid)
-    reset_data(socket.uid)
+    reset_data(socket.uid, undefined)
   });
 });
 
