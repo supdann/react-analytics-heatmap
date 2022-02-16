@@ -1,0 +1,15 @@
+node_modules/
+.vscode/
+.cache/
+.github/
+.husky/
+assets/
+coverage/
+server/
+supdann-react-analytics-heatmap*
+Dockerfile
+docker-compose.yml
+gunicorn_conf.py
+start-reload.sh
+start.sh
+requirements.txt
